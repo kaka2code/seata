@@ -240,13 +240,6 @@
       }
     },
     {
-      "name": "seata.tcc-fence.enabled",
-      "type": "java.lang.Boolean",
-      "description": "Whether enable tcc fence configuration.",
-      "sourceType": "io.seata.spring.boot.autoconfigure.SeataTCCFenceAutoConfiguration",
-      "defaultValue": true
-    },
-    {
       "name": "seata.tcc-fence.config.log-table-name",
       "type": "java.lang.String",
       "description": "TCC fence log table name.",

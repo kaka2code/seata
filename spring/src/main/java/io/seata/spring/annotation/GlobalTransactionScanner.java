@@ -35,6 +35,7 @@ import io.seata.core.rpc.ShutdownHook;
 import io.seata.core.rpc.netty.RmNettyRemotingClient;
 import io.seata.core.rpc.netty.TmNettyRemotingClient;
 import io.seata.rm.RMClient;
+import io.seata.rm.tcc.constant.TCCFenceCleanMode;
 import io.seata.spring.annotation.scannercheckers.PackageScannerChecker;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.OrderUtil;
@@ -106,6 +107,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final FailureHandler failureHandlerHook;
 
     private ApplicationContext applicationContext;
+
+    private static TCCFenceCleanMode tccFenceCleanMode;
+
+    private static int tccFenceCleanPeriod;
+
+    private static String tccFenceCLogTableName;
 
     /**
      * Instantiates a new Global transaction scanner.
@@ -267,7 +274,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 }
                 interceptor = null;
                 //check TCC proxy
-                if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
+                if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext, tccFenceCleanMode, tccFenceCleanPeriod, tccFenceCLogTableName)) {
                     //TCC interceptor, proxy bean of sofa:reference/dubbo:reference, and LocalTCC
                     interceptor = new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
                     ConfigurationCache.addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
@@ -521,6 +528,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     public static void setBeanFactory(ConfigurableListableBeanFactory beanFactory) {
         GlobalTransactionScanner.beanFactory = beanFactory;
+    }
+
+    public static void setTCCFenceConfig(TCCFenceCleanMode cleanMode, int cleanPeriod, String logTableName) {
+        GlobalTransactionScanner.tccFenceCleanMode = cleanMode;
+        GlobalTransactionScanner.tccFenceCleanPeriod = cleanPeriod;
+        GlobalTransactionScanner.tccFenceCLogTableName = logTableName;
     }
 
     public static void addScannablePackages(String... packages) {

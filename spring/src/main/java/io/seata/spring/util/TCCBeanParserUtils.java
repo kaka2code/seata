@@ -15,7 +15,11 @@
  */
 package io.seata.spring.util;
 
+import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
+import io.seata.rm.tcc.config.TCCFenceConfig;
+import io.seata.rm.tcc.constant.TCCFenceCleanMode;
+import io.seata.rm.tcc.exception.TCCFenceException;
 import io.seata.rm.tcc.remoting.Protocols;
 import io.seata.rm.tcc.remoting.RemotingDesc;
 import io.seata.rm.tcc.remoting.RemotingParser;
@@ -23,7 +27,9 @@ import io.seata.rm.tcc.remoting.parser.DefaultRemotingParser;
 import io.seata.spring.tcc.TccActionInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Method;
 
 /**
@@ -32,6 +38,12 @@ import java.lang.reflect.Method;
  * @author zhangsen
  */
 public class TCCBeanParserUtils {
+
+    private static TCCFenceConfig tccFenceConfig = null;
+    public static final String DEFAULT_DATA_SOURCE_BEAN_NAME = "dataSource";
+    public static final String DEFAULT_TRANSACTION_MANAGER_BEAN_NAME = "transactionManager";
+    public static final String TCC_FENCE_DATA_SOURCE_BEAN_NAME = "seataTCCFenceDataSource";
+    public static final String TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME = "seataTCCFenceTransactionManager";
 
     private TCCBeanParserUtils() {
     }
@@ -44,7 +56,7 @@ public class TCCBeanParserUtils {
      * @param applicationContext the application context
      * @return boolean boolean
      */
-    public static boolean isTccAutoProxy(Object bean, String beanName, ApplicationContext applicationContext) {
+    public static boolean isTccAutoProxy(Object bean, String beanName, ApplicationContext applicationContext, TCCFenceCleanMode cleanMode, int cleanPeriod, String logTableName) {
         boolean isRemotingBean = parserRemotingServiceInfo(bean, beanName);
         //get RemotingBean description
         RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
@@ -52,7 +64,7 @@ public class TCCBeanParserUtils {
         if (isRemotingBean) {
             if (remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM) {
                 //LocalTCC
-                return isTccProxyTargetBean(remotingDesc);
+                return isTccProxyTargetBean(remotingDesc, applicationContext, cleanMode, cleanPeriod, logTableName);
             } else {
                 // sofa:reference / dubbo:reference, factory bean
                 return false;
@@ -62,12 +74,12 @@ public class TCCBeanParserUtils {
                 //check FactoryBean
                 if (isRemotingFactoryBean(bean, beanName, applicationContext)) {
                     remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-                    return isTccProxyTargetBean(remotingDesc);
+                    return isTccProxyTargetBean(remotingDesc, applicationContext, cleanMode, cleanPeriod, logTableName);
                 } else {
                     return false;
                 }
             } else {
-                return isTccProxyTargetBean(remotingDesc);
+                return isTccProxyTargetBean(remotingDesc, applicationContext, cleanMode, cleanPeriod, logTableName);
             }
         }
     }
@@ -105,7 +117,7 @@ public class TCCBeanParserUtils {
      * @param remotingDesc the remoting desc
      * @return boolean boolean
      */
-    public static boolean isTccProxyTargetBean(RemotingDesc remotingDesc) {
+    public static boolean isTccProxyTargetBean(RemotingDesc remotingDesc, ApplicationContext applicationContext, TCCFenceCleanMode cleanMode, int cleanPeriod, String logTableName) {
         if (remotingDesc == null) {
             return false;
         }
@@ -117,6 +129,27 @@ public class TCCBeanParserUtils {
         for (Method method : methods) {
             twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
             if (twoPhaseBusinessAction != null) {
+                // check if enable tcc fence
+                if(twoPhaseBusinessAction.useTCCFence() && tccFenceConfig == null && applicationContext != null) {
+                    DataSource dataSource;
+                    PlatformTransactionManager transactionManager;
+                    if (applicationContext.containsBean(TCC_FENCE_DATA_SOURCE_BEAN_NAME)) {
+                        dataSource = (DataSource) applicationContext.getBean(TCC_FENCE_DATA_SOURCE_BEAN_NAME);
+                    } else if (applicationContext.containsBean(DEFAULT_DATA_SOURCE_BEAN_NAME)) {
+                        dataSource = (DataSource) applicationContext.getBean(DEFAULT_DATA_SOURCE_BEAN_NAME);
+                    } else {
+                        throw new TCCFenceException(FrameworkErrorCode.DateSourceNeedInjected);
+                    }
+
+                    if (applicationContext.containsBean(TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME)) {
+                        transactionManager = (PlatformTransactionManager) applicationContext.getBean(TCC_FENCE_TRANSACTION_MANAGER_BEAN_NAME);
+                    } else if (applicationContext.containsBean(DEFAULT_TRANSACTION_MANAGER_BEAN_NAME)) {
+                        transactionManager = (PlatformTransactionManager) applicationContext.getBean(DEFAULT_TRANSACTION_MANAGER_BEAN_NAME);
+                    } else {
+                        throw new TCCFenceException(FrameworkErrorCode.TransactionManagerNeedInjected);
+                    }
+                    tccFenceConfig = new TCCFenceConfig(dataSource, transactionManager, cleanMode, cleanPeriod, logTableName);
+                }
                 isTccClazz = true;
                 break;
             }

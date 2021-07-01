@@ -21,6 +21,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.spring.annotation.GlobalTransactionScanner;
 import io.seata.spring.annotation.ScannerChecker;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
+import io.seata.spring.boot.autoconfigure.properties.client.TCCFenceProperties;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import org.slf4j.Logger;
@@ -56,7 +57,10 @@ public class SeataAutoConfiguration {
     @Bean
     @DependsOn({BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER, BEAN_NAME_FAILURE_HANDLER})
     @ConditionalOnMissingBean(GlobalTransactionScanner.class)
-    public GlobalTransactionScanner globalTransactionScanner(SeataProperties seataProperties, FailureHandler failureHandler,
+    public GlobalTransactionScanner globalTransactionScanner(
+            SeataProperties seataProperties,
+            TCCFenceProperties tccFenceProperties,
+            FailureHandler failureHandler,
             ConfigurableListableBeanFactory beanFactory,
             @Autowired(required = false) List<ScannerChecker> scannerCheckers) {
         if (LOGGER.isInfoEnabled()) {
@@ -76,6 +80,8 @@ public class SeataAutoConfiguration {
         GlobalTransactionScanner.addScannablePackages(seataProperties.getScanPackages());
         // add excludeBeanNames
         GlobalTransactionScanner.addScannerExcludeBeanNames(seataProperties.getExcludesForScanning());
+        // set tccFenceConfig
+        GlobalTransactionScanner.setTCCFenceConfig(tccFenceProperties.getCleanMode(), tccFenceProperties.getCleanPeriod(), tccFenceProperties.getLogTableName());
 
         // create global transaction scanner
         return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
