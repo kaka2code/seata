@@ -262,7 +262,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                         globalSession.getTransactionName(),
                         globalSession.getApplicationId(),
                         globalSession.getTransactionServiceGroup(),
-                        globalSession.getBeginTime(), null, globalSession.getStatus()));
+                        globalSession.getBeginTime(), null, globalSession.getStatus(),
+                        globalSession.isParallelSendTwoStage()));
 
                 return true;
             });

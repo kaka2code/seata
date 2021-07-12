@@ -37,6 +37,8 @@ public final class TransactionInfo implements Serializable {
 
     private int lockRetryTimes;
 
+    private boolean parallelSendTwoStage;
+
     public int getTimeOut() {
         return timeOut;
     }
@@ -106,5 +108,13 @@ public final class TransactionInfo implements Serializable {
 
     public void setLockRetryTimes(int lockRetryTimes) {
         this.lockRetryTimes = lockRetryTimes;
+    }
+
+    public boolean isParallelSendTwoStage() {
+        return parallelSendTwoStage;
+    }
+
+    public void setParallelSendTwoStage(boolean parallelSendTwoStage) {
+        this.parallelSendTwoStage = parallelSendTwoStage;
     }
 }

@@ -41,6 +41,20 @@ public interface TransactionManager {
         throws TransactionException;
 
     /**
+     * Begin a new global transaction.
+     *
+     * @param applicationId           ID of the application who begins this transaction.
+     * @param transactionServiceGroup ID of the transaction service group.
+     * @param name                    Give a name to the global transaction.
+     * @param timeout                 Timeout of the global transaction.
+     * @return XID of the global transaction
+     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
+     * out.
+     */
+    String begin(String applicationId, String transactionServiceGroup, String name, int timeout,
+                 boolean parallelSendTwoStage) throws TransactionException;
+
+    /**
      * Global commit.
      *
      * @param xid XID of the global transaction.

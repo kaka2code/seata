@@ -89,6 +89,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name) throws TransactionException {
+        begin(timeout, name, false);
+    }
+
+    @Override
+    public void begin(int timeout, String name, boolean parallelSendTwoStage) throws TransactionException {
         if (role != GlobalTransactionRole.Launcher) {
             assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
@@ -100,9 +105,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         String currentXid = RootContext.getXID();
         if (currentXid != null) {
             throw new IllegalStateException("Global transaction already exists," +
-                " can't begin a new global transaction, currentXid = " + currentXid);
+                    " can't begin a new global transaction, currentXid = " + currentXid);
         }
-        xid = transactionManager.begin(null, null, name, timeout);
+        xid = transactionManager.begin(null, null, name, timeout, parallelSendTwoStage);
         status = GlobalStatus.Begin;
         RootContext.bind(xid);
         if (LOGGER.isInfoEnabled()) {

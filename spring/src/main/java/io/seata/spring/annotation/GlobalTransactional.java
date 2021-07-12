@@ -127,4 +127,11 @@ public @interface GlobalTransactional {
      * @return int
      */
     int lockRetryTimes() default -1;
+
+    /**
+     * whether tc parallel send two-stage request to rm
+     *
+     * @return the boolean
+     */
+    boolean parallelSendTwoStage() default false;
 }

@@ -69,6 +69,12 @@ public class GlobalTransactionEvent implements Event {
      */
     private final GlobalStatus status;
 
+    /**
+     * whether tc parallel send two-stage request to rm
+     */
+    private final Boolean parallelSendTwoStage;
+
+
     public long getId() {
         return id;
     }
@@ -101,8 +107,13 @@ public class GlobalTransactionEvent implements Event {
         return status;
     }
 
+    public Boolean getParallelSendTwoStage() {
+        return parallelSendTwoStage;
+    }
+
     public GlobalTransactionEvent(long id, String role, String name, String applicationId,
-            String group, Long beginTime, Long endTime, GlobalStatus status) {
+                                  String group, Long beginTime, Long endTime, GlobalStatus status,
+                                  Boolean parallelSendTwoStage) {
         this.id = id;
         this.role = role;
         this.name = name;
@@ -111,5 +122,7 @@ public class GlobalTransactionEvent implements Event {
         this.beginTime = beginTime;
         this.endTime = endTime;
         this.status = status;
+        this.parallelSendTwoStage = parallelSendTwoStage;
     }
+
 }

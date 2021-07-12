@@ -210,6 +210,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     transactionInfo.setPropagation(globalTrxAnno.propagation());
                     transactionInfo.setLockRetryInterval(globalTrxAnno.lockRetryInterval());
                     transactionInfo.setLockRetryTimes(globalTrxAnno.lockRetryTimes());
+                    transactionInfo.setParallelSendTwoStage(globalTrxAnno.parallelSendTwoStage());
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
                     for (Class<?> rbRule : globalTrxAnno.rollbackFor()) {
                         rollbackRules.add(new RollbackRule(rbRule));

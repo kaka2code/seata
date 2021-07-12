@@ -86,6 +86,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private String applicationData;
 
+    private boolean parallelSendTwoStage = false;
+
     private volatile boolean active = true;
 
     private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
@@ -337,6 +339,20 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @param timeout                 the timeout
      */
     public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout) {
+        this(applicationId, transactionServiceGroup, transactionName, timeout, false);
+    }
+
+    /**
+     * Instantiates a new Global session.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param transactionName         the transaction name
+     * @param timeout                 the timeout
+     * @param parallelSendTwoStage    the parallel send two stage
+     */
+    public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout,
+                         boolean parallelSendTwoStage) {
         this.transactionId = UUIDGenerator.generateUUID();
         this.status = GlobalStatus.Begin;
 
@@ -345,6 +361,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.transactionName = transactionName;
         this.timeout = timeout;
         this.xid = XID.generateXID(transactionId);
+        this.parallelSendTwoStage = parallelSendTwoStage;
     }
 
     /**
@@ -474,6 +491,24 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
+     * Gets whether tc parallel send two-stage request to rm
+     *
+     * @return the parallelSendTwoStage
+     */
+    public boolean isParallelSendTwoStage() {
+        return parallelSendTwoStage;
+    }
+
+    /**
+     * Sets parallelSendTwoStage.
+     *
+     * @param parallelSendTwoStage whether tc parallel send two-stage request to rm
+     */
+    public void setParallelSendTwoStage(boolean parallelSendTwoStage) {
+        this.parallelSendTwoStage = parallelSendTwoStage;
+    }
+
+    /**
      * Create global session global session.
      *
      * @param applicationId  the application id
@@ -485,6 +520,22 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
                                                     int timeout) {
         GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout);
+        return session;
+    }
+
+    /**
+     * Create global session global session.
+     *
+     * @param applicationId               the application id
+     * @param txServiceGroup              the tx service group
+     * @param txName                      the tx name
+     * @param timeout                     the timeout
+     * @param parallelSendTwoStage        the parallel send two stage
+     * @return the global session
+     */
+    public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
+                                                    int timeout, boolean parallelSendTwoStage) {
+        GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout, parallelSendTwoStage);
         return session;
     }
 

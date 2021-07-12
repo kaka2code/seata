@@ -29,6 +29,8 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC {
 
     private String transactionName;
 
+    private boolean parallelSendTwoStage;
+
     /**
      * Gets timeout.
      *
@@ -63,6 +65,24 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC {
      */
     public void setTransactionName(String transactionName) {
         this.transactionName = transactionName;
+    }
+
+    /**
+     * Gets whether tc parallel send two-stage request to rm
+     *
+     * @return the parallelSendTwoStage
+     */
+    public boolean isParallelSendTwoStage() {
+        return parallelSendTwoStage;
+    }
+
+    /**
+     * Sets parallelSendTwoStage.
+     *
+     * @param parallelSendTwoStage whether tc parallel send two-stage request to rm
+     */
+    public void setParallelSendTwoStage(boolean parallelSendTwoStage) {
+        this.parallelSendTwoStage = parallelSendTwoStage;
     }
 
     @Override

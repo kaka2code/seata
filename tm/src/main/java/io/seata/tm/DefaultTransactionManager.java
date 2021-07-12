@@ -47,9 +47,16 @@ public class DefaultTransactionManager implements TransactionManager {
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
+        return begin(applicationId, transactionServiceGroup, name, timeout, false);
+    }
+
+    @Override
+    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout,
+                        boolean parallelSendTwoStage) throws TransactionException {
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName(name);
         request.setTimeout(timeout);
+        request.setParallelSendTwoStage(parallelSendTwoStage);
         GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
             throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());

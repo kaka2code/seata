@@ -51,6 +51,13 @@ class DefaultFailureHandlerImplTest {
             }
 
             @Override
+            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout,
+                                boolean parallelSendTwoStage)
+                    throws TransactionException {
+                return DEFAULT_XID;
+            }
+
+            @Override
             public GlobalStatus commit(String xid) throws TransactionException {
                 return GlobalStatus.Committed;
             }

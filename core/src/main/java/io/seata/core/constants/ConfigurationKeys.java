@@ -476,6 +476,27 @@ public interface ConfigurationKeys {
     String THREAD_FACTORY_PREFIX = TRANSPORT_PREFIX + "threadFactory.";
 
     /**
+     * The constant MIN_COMMIT_TASK_POOL_SIZE
+     */
+    String MIN_COMMIT_TASK_POOL_SIZE = TRANSPORT_PREFIX + "minCommitTaskPoolSize";
+
+    /**
+     * The constant MAX_COMMIT_TASK_POOL_SIZE
+     */
+    String MAX_COMMIT_TASK_POOL_SIZE = TRANSPORT_PREFIX + "maxCommitTaskPoolSize";
+
+    /**
+     * The constant COMMIT_TASK_QUEUE_SIZE
+     */
+    String COMMIT_TASK_QUEUE_SIZE = TRANSPORT_PREFIX + "commitTaskQueueSize";
+
+    /**
+     * The constant COMMIT_TASK_KEEP_ALIVE_TIME
+     */
+    String COMMIT_TASK_KEEP_ALIVE_TIME = TRANSPORT_PREFIX + "commitTaskKeepAliveTime";
+
+
+    /**
      * The constant BOSS_THREAD_PREFIX
      */
     String BOSS_THREAD_PREFIX = THREAD_FACTORY_PREFIX + "bossThreadPrefix";

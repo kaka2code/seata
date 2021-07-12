@@ -206,6 +206,11 @@ public abstract class AbstractCore implements Core {
             throws TransactionException {
         return null;
     }
+    @Override
+    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout,
+                 boolean parallelSendTwoStage) throws TransactionException {
+        return null;
+    }
 
     @Override
     public GlobalStatus commit(String xid) throws TransactionException {
